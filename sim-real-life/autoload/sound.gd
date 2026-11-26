@@ -90,4 +90,15 @@ func _build_all() -> void:
 	streams[&"respawn"] = _synth(0.45, func(t, _d):
 		var f := 330.0 if t < 0.15 else (415.0 if t < 0.3 else 495.0)
 		return sin(t * f * TAU) * exp(-fmod(t, 0.15) * 9.0) * 0.4)
-		
+	
+	var eng := _synth(0.6, func(t, _d):
+		return (sin(t * 55.0 * TAU) * 0.5 + sin(t * 110.0 * TAU) * 0.25 + _noise() * 0.12) * 0.5)
+	eng.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	eng.loop_end = int(0.6 * RATE)
+	streams[&"engine"] = eng
+	streams[&"horn"] = _synth(0.45, func(t, _d):
+		return (sin(t * 440.0 * TAU) + sin(t * 554.0 * TAU)) * 0.28 * minf(1.0, t * 40.0) * exp(-maxf(t - 0.35, 0.0) * 20.0))
+	streams[&"crash"] = _synth(0.3, func(t, _d):
+		return (_noise() * 0.7 + sin(t * 90.0 * TAU) * 0.5) * exp(-t * 14.0))
+	streams[&"door"] = _synth(0.12, func(t, _d):
+		return (_noise() * 0.35 + sin(t * 210.0 * TAU) * 0.3) * exp(-t * 45.0))

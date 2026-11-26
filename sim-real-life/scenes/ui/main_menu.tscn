@@ -66,8 +66,8 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "WASD · Shift · Space · Esc — курсор
-ЛКМ — огонь · R — перезарядка · 1/2/3 или колесо мыши — оружие
-Tab (держать) — колесо оружия · M — звук"
+ЛКМ — огонь · R — перезарядка · 1/2/3 или колесо — оружие
+Tab — колесо оружия · E — вход/выход тачки · H — сигнал · M — звук"
 horizontal_alignment = 1
 
 [node name="QuitBtn" type="Button" parent="Center/VBox" unique_id=1369973115]

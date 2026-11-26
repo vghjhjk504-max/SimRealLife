@@ -62,6 +62,7 @@ func _setup_input() -> void:
 		&"jump": KEY_SPACE, &"sprint": KEY_SHIFT,
 		&"reload": KEY_R, &"weapon_1": KEY_1, &"weapon_2": KEY_2,
 		&"weapon_3": KEY_3, &"weapon_wheel": KEY_TAB, &"mute": KEY_M,
+		&"interact": KEY_E, &"horn": KEY_H,
 	}
 	for action: StringName in binds:
 		if InputMap.has_action(action):

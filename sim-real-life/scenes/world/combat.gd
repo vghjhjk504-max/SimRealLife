@@ -10,6 +10,7 @@ var _dead := {}
 var _kills := {}
 var _deaths := {}
 var _reloading := {}
+var _last_ram := {}
 
 func register(id: int) -> void:
 	if not multiplayer.is_server():
@@ -22,6 +23,7 @@ func register(id: int) -> void:
 	rpc_id(id, &"stats_full", _kills, _deaths)
 
 func unregister(id: int) -> void:
+	_last_ram.erase(id)
 	_mags.erase(id)
 	_last_fire.erase(id)
 	_dead.erase(id)
@@ -70,7 +72,7 @@ func request_fire(w: int, origin: Vector3, dir: Vector3) -> void:
 	var hit_pos := end
 	var victim := 0
 	var space := get_world_3d().direct_space_state
-	var q := PhysicsRayQueryParameters3D.create(origin, end, 3, [p.get_rid()])
+	var q := PhysicsRayQueryParameters3D.create(origin, end, 7, [p.get_rid()])
 	var res := space.intersect_ray(q)
 	if res.is_empty() and wd.melee:
 		# кулаку даём поблажку — сфера вместо тонкого луча
@@ -307,3 +309,34 @@ func _local() -> Node:
 func _hud() -> Node:
 	var a := get_tree().get_nodes_in_group(&"hud")
 	return a[0] if a.size() > 0 else null
+
+@rpc("any_peer", "call_local", "reliable")
+func request_ram(vid: int, speed: float) -> void:
+	if not multiplayer.is_server():
+		return
+	var id := multiplayer.get_remote_sender_id()
+	if id == 0:
+		id = 1
+	var p := players.get_node_or_null(str(id)) as Player
+	var v := players.get_node_or_null(str(vid)) as Player
+	if p == null or v == null or vid == id:
+		return
+	if p.car_id == 0 or _dead.get(id, true) or _dead.get(vid, false):
+		return
+	speed = clampf(speed, 0.0, 40.0)
+	if speed < 6.0:
+		return
+	var now := Time.get_ticks_msec()
+	if now - int(_last_ram.get(id, 0)) < 600:
+		return
+	_last_ram[id] = now
+	if p.global_position.distance_to(v.global_position) > 5.0:
+		return
+	_apply_damage(id, vid, clampi(int(speed * 3.2), 10, 120), Weapons.KILL_CAR)
+	rpc(&"ram_fx", v.global_position + Vector3(0, 1.0, 0))
+
+@rpc("authority", "call_local", "reliable")
+func ram_fx(pos: Vector3, dmg: int) -> void:
+	Sound.play3d(&"hit", self, pos, -1.0)
+	_burst(pos, Color(0.9, 0.12, 0.12), 12)
+	_damage_number(pos, dmg)

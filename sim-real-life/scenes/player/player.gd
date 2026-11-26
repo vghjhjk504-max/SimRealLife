@@ -16,6 +16,27 @@ var nick := "Бро"
 var wheel_open := false
 var wheel_vec := Vector2.ZERO
 
+var car_id := 0:
+	set(v):
+		car_id = v
+		if not is_node_ready():
+			return
+		var in_car := v != 0
+		wheel_open = false
+		body_mesh.visible = not in_car
+		_socket.visible = not in_car and not _dead
+		collider.set_deferred("disabled", in_car or _dead)
+		_update_overhead()
+		if _mine:
+			_car_look = 0.0
+			_look_idle = 0.0
+			rig.rotation.y = 0.0
+			arm.spring_length = 6.5 if in_car else 4.0
+			Sound.play(&"door", -5.0)
+
+var _car_look := 0.0
+var _look_idle := 0.0
+
 var weapon_id: int = Weapons.ID.FISTS:
 	set(v):
 		weapon_id = v
@@ -65,6 +86,7 @@ var _hp_fg_mat: StandardMaterial3D
 @onready var collider: CollisionShape3D = $Collider
 @onready var body_mesh: MeshInstance3D = $Body
 @onready var combat: Node = get_node("/root/World/Combat")
+@onready var traffic: Traffic = get_node("/root/World/Traffic")
 
 func _ready() -> void:
 	add_to_group(&"player")
@@ -130,7 +152,7 @@ func _update_overhead() -> void:
 	var frac := hp / float(MAX_HP)
 	(_hp_fg.mesh as QuadMesh).size = Vector2(1.02 * maxf(frac, 0.001), 0.05)
 	_hp_fg_mat.albedo_color = Color(1, 0.25, 0.2).lerp(Color(0.3, 1, 0.45), frac)
-	var show_bar := not _mine and not _dead
+	var show_bar := not _mine and not _dead and car_id == 0
 	_hp_bg.visible = show_bar
 	_hp_fg.visible = show_bar
 
@@ -235,15 +257,32 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("mute"):
 		Sound.toggle_mute()
 		return
+	if event.is_action_pressed("interact") and not _dead:
+		if car_id != 0:
+			traffic.rpc_id(1, &"request_exit")
+		else:
+			var c := traffic.nearest_free_car(global_position)
+			if c:
+				traffic.rpc_id(1, &"request_enter", c.car_id)
+		return
+	if event.is_action_pressed("horn") and car_id != 0:
+		traffic.rpc(&"honk", car_id)
+		return
 	if _dead:
 		return
 	if event is InputEventMouseMotion:
 		if wheel_open:
 			wheel_vec += event.relative
 		elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			rotate_y(-event.relative.x * SENS)
+			if car_id != 0:
+				_car_look = clampf(_car_look - event.relative.x * SENS, -2.6, 2.6)
+				_look_idle = 0.0
+			else:
+				rotate_y(-event.relative.x * SENS)
 			_pitch = clampf(_pitch - event.relative.y * SENS, -1.2, 0.55)
 			arm.rotation.x = _pitch
+		return
+	if car_id != 0:
 		return
 	if event.is_action_pressed("weapon_wheel"):
 		wheel_open = true
@@ -275,6 +314,9 @@ func _physics_process(delta: float) -> void:
 		return
 	cam.h_offset = (randf() - 0.5) * _shake
 	cam.v_offset = (randf() - 0.5) * _shake
+	if car_id != 0:
+		_follow_car(delta)
+		return
 	if _dead:
 		rig.rotate_y(delta * 0.4)
 		return
@@ -455,3 +497,19 @@ func do_respawn(pos: Vector3) -> void:
 	_cooldown = 0.0
 	_revive()
 	Sound.play(&"respawn", -4.0)
+
+func _follow_car(delta: float) -> void:
+	var c := get_node_or_null("/root/World/Cars/" + str(car_id)) as Car
+	if c == null:
+		return
+	global_position = c.global_position
+	rotation.y = c.rotation.y
+	_look_idle += delta
+	if _look_idle > 1.4:
+		_car_look = lerpf(_car_look, 0.0, 1.0 - exp(-2.0 * delta))
+	rig.rotation.y = _car_look
+	velocity = Vector3.ZERO
+
+func place_at(pos: Vector3) -> void:
+	global_position = pos
+	velocity = Vector3.ZERO

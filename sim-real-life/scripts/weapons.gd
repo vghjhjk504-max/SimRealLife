@@ -5,6 +5,10 @@ extends RefCounted
 enum ID { FISTS, PISTOL, RIFLE }
 
 const RESPAWN_TIME := 3.0
+const KILL_CAR := 99
+
+static func name_of(w: int) -> String:
+	return "ТАЧКА" if w == KILL_CAR else DATA.get(w, DATA[ID.FISTS]).name
 
 const DATA := {
 	ID.FISTS: {
