@@ -33,5 +33,5 @@ environment = SubResource("env")
 [node name="Spawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("../Players")
 
-[node name="Combat" type="Node" parent="."]
+[node name="Combat" type="Node3D" parent="."]
 script = ExtResource("2")

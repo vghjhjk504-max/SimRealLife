@@ -1,4 +1,4 @@
-extends Node
+extends Node3D
 # Combat: сервер — судья района. Урон, патроны, смерть, респавн. Клиенты шлют запросы, сервер решает.
 
 @onready var world: Node = get_parent()
@@ -46,7 +46,7 @@ func request_fire(w: int, origin: Vector3, dir: Vector3) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	if id == 0:
 		id = 1
-	var p := players.get_node_or_null(str(id))
+	var p := players.get_node_or_null(str(id)) as Player
 	if p == null or _dead.get(id, true) or not Weapons.DATA.has(w):
 		return
 	var wd: Dictionary = Weapons.DATA[w]
@@ -66,7 +66,7 @@ func request_fire(w: int, origin: Vector3, dir: Vector3) -> void:
 			return
 		_mags[id][w] = mag - 1
 		rpc_id(id, &"ammo_state", w, mag - 1)
-	var end := origin + dir * wd.range
+	var end: Vector3 = origin + dir * wd.range
 	var hit_pos := end
 	var victim := 0
 	var space := get_world_3d().direct_space_state
@@ -120,7 +120,7 @@ func request_reload(w: int) -> void:
 	)
 
 func _apply_damage(killer: int, vid: int, dmg: int, w: int) -> void:
-	var v := players.get_node(str(vid))
+	var v := players.get_node(str(vid)) as Player
 	v.hp = maxi(0, v.hp - dmg)
 	rpc_id(vid, &"hurt_fx", dmg, killer)
 	if v.hp <= 0:
@@ -135,7 +135,7 @@ func _apply_damage(killer: int, vid: int, dmg: int, w: int) -> void:
 func _respawn(id: int) -> void:
 	if not multiplayer.is_server():
 		return
-	var p := players.get_node_or_null(str(id))
+	var p := players.get_node_or_null(str(id)) as Player
 	if p == null:
 		return
 	_dead[id] = false
@@ -203,7 +203,7 @@ func stats_full(kills: Dictionary, deaths: Dictionary) -> void:
 @rpc("authority", "call_local", "reliable")
 func combat_fx(shooter: int, w: int, origin: Vector3, end: Vector3, victim: int, hit_pos: Vector3) -> void:
 	var wd: Dictionary = Weapons.DATA.get(w, Weapons.DATA[Weapons.ID.FISTS])
-	var sp := players.get_node_or_null(str(shooter))
+	var sp := players.get_node_or_null(str(shooter)) as Player
 	var me := multiplayer.get_unique_id()
 	if sp and shooter != me:
 		sp.remote_fire_fx(w)
@@ -215,7 +215,7 @@ func combat_fx(shooter: int, w: int, origin: Vector3, end: Vector3, victim: int,
 	var muzzle: Vector3 = sp.get_muzzle_pos() if sp else origin
 	_tracer(muzzle, end, wd.color)
 	if victim != 0:
-		var v := players.get_node_or_null(str(victim))
+		var v := players.get_node_or_null(str(victim)) as Player
 		if v:
 			v.flash_hit()
 		_burst(hit_pos, Color(0.9, 0.12, 0.12), 8)
@@ -302,8 +302,8 @@ func _nick(id: int) -> String:
 
 func _local() -> Node:
 	var a := get_tree().get_nodes_in_group(&"local_player")
-	return a[0] if a.size() > 0 else null
+	return (a[0] as Player) if a.size() > 0 else null
 
 func _hud() -> Node:
 	var a := get_tree().get_nodes_in_group(&"hud")
-	return a[0] if a.size() > 0 else nulls
+	return a[0] if a.size() > 0 else null

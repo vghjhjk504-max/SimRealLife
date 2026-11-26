@@ -1,3 +1,4 @@
+class_name Player
 extends CharacterBody3D
 # Человек v0.2: кулаки, стволы, HP, смерть и респавн. Authority рулит, сервер судит.
 

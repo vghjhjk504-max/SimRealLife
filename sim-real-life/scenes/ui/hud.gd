@@ -6,7 +6,7 @@ class Overlay extends Control:
 	func _draw() -> void:
 		hud._paint(self)
 
-var player: CharacterBody3D = null
+var player: Player = null
 var _overlay: Overlay
 var _vignette: TextureRect
 var _feed: VBoxContainer
@@ -120,7 +120,7 @@ func _process(delta: float) -> void:
 	if player == null:
 		var arr := get_tree().get_nodes_in_group(&"local_player")
 		if arr.size() > 0:
-			player = arr[0]
+			player = arr[0] as Player
 			player.weapon_changed.connect(_on_weapon_changed)
 	_hitmarker_t = maxf(0.0, _hitmarker_t - delta)
 	_toast_t = maxf(0.0, _toast_t - delta)
@@ -238,7 +238,7 @@ func _paint(ci: Control) -> void:
 	# панель оружия
 	var panel := Rect2(s.x - 300, s.y - 118, 272, 90)
 	ci.draw_rect(panel, Color(0.03, 0.03, 0.07, 0.72))
-	var bc := wd.color
+	var bc: Color = wd.color
 	bc.a = 0.6
 	ci.draw_rect(panel, bc, false, 1.5)
 	Weapons.draw_icon(ci, player.weapon_id, panel.position + Vector2(14, 18), 54.0, wd.color)
