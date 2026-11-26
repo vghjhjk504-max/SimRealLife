@@ -11,8 +11,14 @@ config_version=5
 [application]
 
 config/name="SimRealLife"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.8", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Net="*uid://bi0ochw1ji4ji"
+Sound="*uid://gpd8y2uunqr8"
 
 [display]
 

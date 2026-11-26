@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://cl6pt0dn2oxig"]
+
+[ext_resource type="Script" uid="uid://cpevhnkew5jsa" path="res://scenes/ui/main_menu.gd" id="1"]
+
+[node name="MainMenu" type="Control" unique_id=793653103]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Bg" type="ColorRect" parent="." unique_id=839233565]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.06, 0.06, 0.09, 1)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1800453030]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center" unique_id=1342379784]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Center/VBox" unique_id=612390408]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "BETON CITY"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/VBox" unique_id=2124144979]
+layout_mode = 2
+text = "бетонные джунгли · LAN sandbox"
+horizontal_alignment = 1
+
+[node name="NickEdit" type="LineEdit" parent="Center/VBox" unique_id=748995524]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+placeholder_text = "Погоняло"
+
+[node name="HostBtn" type="Button" parent="Center/VBox" unique_id=1177863556]
+layout_mode = 2
+text = "СОЗДАТЬ ИГРУ  (хост LAN / соло)"
+
+[node name="IpHint" type="Label" parent="Center/VBox" unique_id=1750395199]
+layout_mode = 2
+text = "твой LAN-IP для братвы: ..."
+horizontal_alignment = 1
+
+[node name="IpEdit" type="LineEdit" parent="Center/VBox" unique_id=1029514433]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+placeholder_text = "IP хоста, напр. 192.168.1.42"
+
+[node name="JoinBtn" type="Button" parent="Center/VBox" unique_id=960201480]
+layout_mode = 2
+text = "ПОДКЛЮЧИТЬСЯ"
+
+[node name="Status" type="Label" parent="Center/VBox" unique_id=2072551497]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Controls" type="Label" parent="Center/VBox" unique_id=667366857]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "WASD · Shift · Space · Esc — курсор
+ЛКМ — огонь · R — перезарядка · 1/2/3 или колесо мыши — оружие
+Tab (держать) — колесо оружия · M — звук"
+horizontal_alignment = 1
+
+[node name="QuitBtn" type="Button" parent="Center/VBox" unique_id=1369973115]
+layout_mode = 2
+text = "ВЫЙТИ"
